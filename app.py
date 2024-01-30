@@ -29,8 +29,8 @@ class TweetSentimentApp:
         self.agitative_words = set(open('agitative_words.txt').read().splitlines())
         self.max_sequence_length = 100
         # Load your logistic regression model and other necessary components here
-        self.logistic_regression_model = joblib.load('logistic_regression_model.pkl')  # Load your logistic regression model
-        self.tfidf_vectorizer = joblib.load('tf-idf-vectorizer.pkl')  # Load TF-IDF vectorizer or other feature extraction methods
+        self.multinomial_naive_bayes_model = joblib.load('multinomial_naive_bayes_model.pkl')  # Load your logistic regression model
+        self.tfidf_vectorizer = joblib.load('tfidf_vectorizer.pkl')  # Load TF-IDF vectorizer or other feature extraction methods
 
     def clean_text(self, text):
         text = str(text)
@@ -58,7 +58,7 @@ class TweetSentimentApp:
             # Vectorize the text using the same method used during training
             text_vector = self.tfidf_vectorizer.transform([text])  # You can adjust this for your specific preprocessing
             # Predict sentiment using the logistic regression model
-            sentiment_label = self.logistic_regression_model.predict(text_vector)
+            sentiment_label = self.multinomial_naive_bayes_model.predict(text_vector)
             return sentiment_label[0]  # Return the predicted sentiment label
       
         return "N/A", None
@@ -623,6 +623,6 @@ class MultiuserTweetSentimentApp(TweetSentimentApp):
 
 if __name__ == '__main__':
     app = MultiuserTweetSentimentApp()
-    analyzer = TopicModelingAnalyzer(tfidf_vectorizer_path='tf-idf-vectorizer.pkl')
+    analyzer = TopicModelingAnalyzer(tfidf_vectorizer_path='tfidf_vectorizer.pkl')
     # app.run_multiuser_analysis(SentimentIntensityAnalyzer.run.df)
     app.run()

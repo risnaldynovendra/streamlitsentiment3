@@ -23,7 +23,7 @@ class TweetSentimentApp:
         self.sent_analyzer = SentimentIntensityAnalyzer()
         self.positive_words = self.read_word_list('positive_words.txt')
         self.negative_words = self.read_word_list('negative_words.txt')
-        self.neutral_words = self.read_word_list('neutral_words.txt')
+        # self.neutral_words = self.read_word_list('neutral_words.txt')
         self.constructive_words = self.read_word_list('constructive_words.txt')
         self.destructive_words = self.read_word_list('destructive_words.txt')
         self.agitative_words = set(open('agitative_words.txt').read().splitlines())
@@ -44,12 +44,11 @@ class TweetSentimentApp:
         
 
     def analyze_sentiment(self, text):
-        
         sid = SentimentIntensityAnalyzer()
         sentiment_score = sid.polarity_scores(text)['compound']
-        sentiment_tag = 'positive' if sentiment_score > 0 else ('negative' if sentiment_score < 0 else 'neutral')
-        
+        sentiment_tag = 'positive' if sentiment_score > 0 else 'negative'
         return sentiment_score, sentiment_tag
+
     
     def predict_sentiment(self, text):
         
@@ -70,7 +69,7 @@ class TweetSentimentApp:
             elif sentiment_score < 0:
                 return 'negative'
             else:
-                return 'neutral'
+                return 'negative'  # Set to 'negative' for scores equal to 0 as well
         except ValueError:
             return 'Invalid'
     def get_sentiment_score(self, tweet):
@@ -126,8 +125,8 @@ class TweetSentimentApp:
                     mentions.append((username, word, 'positive'))
                 elif word in self.negative_words:
                     mentions.append((username, word, 'negative'))
-                elif word in self.neutral_words:
-                    mentions.append((username, word, 'neutral'))
+                # elif word in self.neutral_words:
+                #     mentions.append((username, word, 'neutral'))
                 # elif word in self.agitative_words:
                 #     mentions.append((username, word, 'agitative'))
         
@@ -169,20 +168,17 @@ class TweetSentimentApp:
 
             blob = TextBlob(tweet)
             for word in blob.words:
-                if word in self.positive_words or word in self.negative_words or word in self.neutral_words:
+                if word in self.positive_words or word in self.negative_words:
                     sentiment = ''
                     if word in self.positive_words:
                         sentiment = 'positive'
                     elif word in self.negative_words:
                         sentiment = 'negative'
-                    else:
-                        sentiment = 'neutral'
-                        
+
                     if username not in user_word_frequency:
                         user_word_frequency[username] = {
                             'positive': {},
                             'negative': {},
-                            'neutral': {}
                         }
                     if word not in user_word_frequency[username][sentiment]:
                         user_word_frequency[username][sentiment][word] = 0
@@ -212,30 +208,26 @@ class TweetSentimentApp:
             blob = TextBlob(tweet)
             positive_count = 0
             negative_count = 0
-            neutral_count = 0
 
             for word in blob.words:
                 if word in self.positive_words:
                     positive_count += 1
                 elif word in self.negative_words:
                     negative_count += 1
-                elif word in self.neutral_words:
-                    neutral_count += 1
 
             if username not in sentiment_percentages:
                 sentiment_percentages[username] = {
                     'positive': 0,
                     'negative': 0,
-                    'neutral': 0
                 }
 
-            total_words = positive_count + negative_count + neutral_count
+            total_words = positive_count + negative_count
             if total_words > 0:
                 sentiment_percentages[username]['positive'] += (positive_count / total_words)
                 sentiment_percentages[username]['negative'] += (negative_count / total_words)
-                sentiment_percentages[username]['neutral'] += (neutral_count / total_words)
 
         return sentiment_percentages
+
 # =============================================================================================
     def find_most_patriotic_politician(self, df):
         politician_sentiment_count = {}
@@ -369,7 +361,7 @@ class TweetSentimentApp:
     # WordCloud Generation
     # ====================================================================================
     def generate_wordclouds_for_each_user(self, dataframe):
-        for sentiment in ['positive', 'negative', 'neutral']:
+        for sentiment in ['positive', 'negative']:
             for username in dataframe['username'].unique():
                 words = self.get_words_by_sentiment(dataframe, username, sentiment)
                 if words:
